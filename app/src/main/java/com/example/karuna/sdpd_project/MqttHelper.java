@@ -18,13 +18,13 @@ public class MqttHelper {
     final String serverUri = "tcp://m16.cloudmqtt.com:11820";
 
     final String clientId = "ExampleAndroidClient";
-    final String subscriptionTopic = "sensor/+";
-
+    final String subscriptionTopic;
     final String username = "";
     final String password = "";
 
-    public MqttHelper(Context context){
+    public MqttHelper(Context context, String topic){
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
+        subscriptionTopic = topic;
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean b, String s) {

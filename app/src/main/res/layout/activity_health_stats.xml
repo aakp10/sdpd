@@ -65,7 +65,7 @@
                 tools:layout_editor_absoluteY="136dp"/>
 
             <TextView
-                android:id="@+id/StepsReceived"
+                android:id="@+id/stepsReceived"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
