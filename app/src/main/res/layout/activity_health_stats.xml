@@ -38,6 +38,13 @@
             android:text="Steps count"
             tools:layout_editor_absoluteX="100dp"
             tools:layout_editor_absoluteY="136dp" />
+
+        <TextView
+            android:id="@+id/dataReceived"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TextView" />
     </LinearLayout>
     <fragment
         android:id="@+id/optionsFragment"
