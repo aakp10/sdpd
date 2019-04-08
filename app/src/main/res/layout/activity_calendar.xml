@@ -72,26 +72,25 @@
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:text="Tablets Qty"
-                android:id="@+id/qty"/>
+                />
 
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0" />
+                android:id="@+id/qty"/>
         </TableRow>
 
     </TableLayout>
 
 
-    <ImageButton
+    <Button
         android:id="@+id/imageButton"
         android:layout_width="94dp"
         android:layout_height="69dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="187dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/pill"
+        android:text="submit"
         android:onClick="saveMeds"/>
 
 

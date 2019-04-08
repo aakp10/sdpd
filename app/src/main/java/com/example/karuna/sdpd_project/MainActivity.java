@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
         instance = this;
+        medicineList = new ArrayList<>();
     }
 
     public void HealthStatsClick(View view) {
@@ -47,4 +48,8 @@ public class MainActivity extends AppCompatActivity {
     public ArrayList<MedicineDetails> getMedicineList() {
         return medicineList;
     }
+    public void setMedicineList(ArrayList<MedicineDetails> md) {
+        medicineList = md;
+    }
+
 }

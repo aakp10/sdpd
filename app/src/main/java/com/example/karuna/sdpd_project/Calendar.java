@@ -2,19 +2,22 @@ package com.example.karuna.sdpd_project;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 public class Calendar extends AppCompatActivity {
 
-    TextView medsName;
+    EditText medsName;
     CheckBox morning;
     CheckBox noon;
     CheckBox night;
-    TextView qty;
+    EditText qty;
     ArrayList<MedicineDetails> medicineList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +29,21 @@ public class Calendar extends AppCompatActivity {
         night = findViewById(R.id.night);
         qty = findViewById(R.id.qty);
         medicineList = MainActivity.instance.getMedicineList();
-    }
-    public void saveMeds(View view) {
-        MedicineDetails newMeds = new MedicineDetails(medsName.getText().toString(),
-                                                  morning.isChecked(),
-                                                  noon.isChecked(),
-                                                  night.isChecked(),
-                Integer.parseInt(qty.getText().toString()));
-        medicineList.add(newMeds);
-    }
+        Button button = (Button) findViewById(R.id.imageButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.d("addMeds", qty.getText().toString());
+                Log.d("addmeds","size" +medicineList.size());
+                MedicineDetails newMeds = new MedicineDetails(medsName.getText().toString(),
+                        morning.isChecked(),
+                        noon.isChecked(),
+                        night.isChecked(),
+                        Integer.parseInt(qty.getText().toString()));
+                medicineList.add(newMeds);
+                MainActivity.instance.setMedicineList(medicineList);
+                Log.d("addmeds","size" +medicineList.size());
+            }
+        });
 
-
+    }
 }

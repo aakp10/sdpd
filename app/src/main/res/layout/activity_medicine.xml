@@ -8,66 +8,12 @@
     android:orientation="vertical">
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Medicine Schedule"/>
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/listview">
 
-        <TableRow>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="1"
-                android:text="Aspirin" />
-
-            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Noon"
-                android:checked="true"/>
-            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Night"
-                android:checked="false"/>
-        </TableRow>
-
-        <TableRow>
-
-            <TextView
-                android:text="Paracetam"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="1" />
-
-            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Noon"
-                android:checked="false"/>
-        </TableRow>
-        <TableRow>
-
-            <TextView
-                android:text="Aspirin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="1" />
-
-            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Night"
-                android:checked="false"/>
-        </TableRow>
-
-    </TableLayout>
-
+    </ListView>
     <fragment
         android:id="@+id/optionsFragment"
         class="com.example.karuna.sdpd_project.OptionsFragment"
