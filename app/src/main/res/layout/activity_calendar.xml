@@ -31,6 +31,7 @@
                 android:text="Medicine Name" />
 
             <EditText
+                android:id="@+id/medsName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="_" />
@@ -45,16 +46,19 @@
                 android:text="Dosage" />
 
             <CheckBox
+                android:id="@+id/morning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Morning" />
 
             <CheckBox
+                android:id="@+id/noon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Noon" />
 
             <CheckBox
+                android:id="@+id/night"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Night" />
@@ -67,7 +71,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:text="Tablets Qty" />
+                android:text="Tablets Qty"
+                android:id="@+id/qty"/>
 
             <EditText
                 android:layout_width="wrap_content"
@@ -86,7 +91,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="187dp"
         android:scaleType="fitXY"
-        android:src="@drawable/pill" />
+        android:src="@drawable/pill"
+        android:onClick="saveMeds"/>
 
 
     <fragment

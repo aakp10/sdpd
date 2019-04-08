@@ -7,8 +7,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
+    static MainActivity instance;
+    ArrayList<MedicineDetails> medicineList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });*/
+        instance = this;
     }
 
     public void HealthStatsClick(View view) {
@@ -37,5 +42,9 @@ public class MainActivity extends AppCompatActivity {
         Intent medsIntent = new Intent(this, Medicine.class);
         //healthIntent.putExtra(ReceiveName.USER_NAME, name);
         startActivity(medsIntent);
+    }
+
+    public ArrayList<MedicineDetails> getMedicineList() {
+        return medicineList;
     }
 }
