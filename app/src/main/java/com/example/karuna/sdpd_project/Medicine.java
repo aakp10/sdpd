@@ -80,12 +80,14 @@ public class Medicine extends AppCompatActivity {
 
             // Add items via the Button and EditText at the bottom of the view.
             final EditText text = (EditText) findViewById(R.id.todoText);
+            final CheckBox morning = (CheckBox) findViewById()
             final Button button = (Button) findViewById(R.id.addButton);
             button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
 
                     mDatabase.child("users").child(mUserId).child("items").push().child("title").setValue(text.getText().toString());
                     //mDatabase.child("users").child(mUserId).child("items").push().child("morning").setValue(text.getText().toString());
+                    mDatabase.child("users").child(mUserId).child("items").push().child("Morning").setValue(.getText().toString());
                     text.setText("");
                     Log.d("todo", "sending");
                 }
@@ -96,7 +98,10 @@ public class Medicine extends AppCompatActivity {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     Log.d("todo", "Fetching");
-                    ListItem item = new ListItem((String) dataSnapshot.child("title").getValue(), "des");
+                    ListItem item = new ListItem((String) dataSnapshot.child("title").getValue(),
+                                                (boolean) dataSnapshot.child("Morning").getValue(),
+                                                (boolean) dataSnapshot.child("Noon").getValue(),
+                                                (boolean) dataSnapshot.child("Morning").getValue());
                     listItems.add(item);
                     recyclerView.setAdapter(adapter);
                     //adapter.add((String) dataSnapshot.child("title").getValue());

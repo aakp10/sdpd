@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -34,8 +35,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // Call holder.vehicles to access the ViewHolder vehicles view here
         ListItem listItem = listItems.get(position);
         holder.heading.setText(listItem.getHeading());
-        holder.desc.setText(listItem.getDescription());
-
+        holder.morning.setChecked(listItem.isMorning());
+        holder.noon.setChecked(listItem.isNoon());
+        holder.night.setChecked(listItem.isNight());
     }
 
     @Override
@@ -45,11 +47,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
     public  class ViewHolder extends RecyclerView.ViewHolder{
         public TextView heading;
-        public TextView desc;
+        public CheckBox morning;
+        public CheckBox noon;
+        public CheckBox night;
         public ViewHolder(View itemView) {
             super(itemView);
             heading = (TextView)itemView.findViewById(R.id.HeadingTextView);
-            desc = (TextView)itemView.findViewById(R.id.descTextView);
+            morning = (CheckBox) itemView.findViewById(R.id.morning);
+            noon = (CheckBox) itemView.findViewById(R.id.noon);
+            night = (CheckBox) itemView.findViewById(R.id.night);
         }
 
     }
