@@ -202,7 +202,7 @@ public class HealthStats extends AppCompatActivity {
                 }
             }
         }
-        String PULSE = "Pulse";
+        //String PULSE = "Pulse";
         boolean flag = false;
         while (true) {
             Log.v("b", "entered");
@@ -212,8 +212,7 @@ public class HealthStats extends AppCompatActivity {
                 byte[] buffer = new byte[256];
                 bytes = inStream.read(buffer);            //read bytes from input buffer
                 readMessage = new String(buffer, 0, bytes);
-                if(readMessage.equals("Pulse"))
-                    flag = true;
+                flag = !flag;
                 if(flag == false) {
                     // Send the obtained bytes to the UI Activity via handler
                     runOnUiThread(new Runnable() {
@@ -227,7 +226,7 @@ public class HealthStats extends AppCompatActivity {
                     });
                 }
                 else {
-                    if (readMessage.equals("Pulse") == false) {
+
                         runOnUiThread(new Runnable() {
 
                             @Override
@@ -237,8 +236,8 @@ public class HealthStats extends AppCompatActivity {
 
                             }
                         });
-                        flag = false;
-                    }
+
+
 
 
                 }
