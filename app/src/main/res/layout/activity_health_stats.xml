@@ -27,9 +27,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal"
-            tools:context=".HealthStats"
-            android:layout_marginTop="20dp">
+            tools:context=".HealthStats">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -62,7 +62,7 @@
                 android:layout_height="15dp"
                 android:text="Steps count"
                 tools:layout_editor_absoluteX="100dp"
-                tools:layout_editor_absoluteY="136dp"/>
+                tools:layout_editor_absoluteY="136dp" />
 
             <TextView
                 android:id="@+id/stepsReceived"
@@ -72,8 +72,12 @@
                 android:text="TextView" />
         </LinearLayout>
 
-
-
+        <Button
+            android:id="@+id/temp"
+            android:layout_width="100dp"
+            android:layout_marginTop="300dp"
+            android:layout_height="100dp"
+            android:background="@android:color/white" />
     </LinearLayout>
     <fragment
         android:id="@+id/optionsFragment"
