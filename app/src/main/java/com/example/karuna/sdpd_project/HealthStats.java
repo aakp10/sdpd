@@ -2,198 +2,269 @@ package com.example.karuna.sdpd_project;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanResult;
+import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.os.Message;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
+import android.os.ParcelUuid;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.w3c.dom.Text;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Set;
 public class HealthStats extends AppCompatActivity {
 
-    private static final UUID SERVICE_UUID = UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
-    private static final UUID PULSE_UUID = UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8");
-    private static final UUID STEPS_UUID = UUID.fromString("a73ea952-debb-4be9-87d0-0ff278a23b1e");
-    private BluetoothGatt mConnectedGatt;
-    BluetoothAdapter mBluetoothAdapter;
+    String readMessage;
+    private static final int REQUEST_ENABLE_BT = 1;
+    private OutputStream outputStream;
+    private InputStream inStream;
+    private Context mContext;
+    private TextView mTextView, mTextView2;
+    private Thread thread;
+    private boolean blueToothStatus = false;
+    BluetoothSocket socket;
+    // Initialize a new BroadcastReceiver instance
+    private BroadcastReceiver mBroadcastReceiverBT = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("Bluetooth", "Received data from esp32");
+            String action = intent.getAction();
 
-    BluetoothManager bluetoothManager;
-    private static final String DEVICE_NAME = "SensorTag";
-    private SparseArray<BluetoothDevice> mDevices;
-    TextView dataReceived;
-    TextView stepsReceived;
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                Toast.makeText(context, "connected", Toast.LENGTH_SHORT).show();
+                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)
+                        == BluetoothAdapter.STATE_ON) {
+
+                    blueToothStatus = true;
+                    Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
+                    BluetoothDevice esp32;
+                    if (bondedDevices.size() > 0) {
+                        for (BluetoothDevice device : bondedDevices) {
+                            if (device.getName().equals("ESP32")) {
+                                esp32 = device;
+                                try {
+                                    Log.v("bluetooth", "Here");
+                                    ParcelUuid[] uuids = esp32.getUuids();
+                                    socket = esp32.createRfcommSocketToServiceRecord(uuids[0].getUuid());
+                                    socket.connect();
+                                    outputStream = socket.getOutputStream();
+                                    inStream = socket.getInputStream();
+                                    mTextView.setText(inStream.read());
+                                } catch (Exception e) {
+                                    Log.v("Error", e.toString());
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    blueToothStatus = false;
+                    try {
+                        outputStream.close();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }
+    };
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_health_stats);
-        dataReceived = (TextView) findViewById(R.id.dataReceived);
-        stepsReceived = (TextView) findViewById(R.id.stepsReceived);
-        dataReceived.setText("81");
-        stepsReceived.setText("0");
 
-        bluetoothManager= (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        mDevices = new SparseArray<>();
-        //mGatt = device.connectGatt(mContext, false, mGattCallback);
+        // Get the application context
+        mContext = getApplicationContext();
 
-    }
-    @Override
-    protected  void onResume() {
-        super.onResume();
-        if(mBluetoothAdapter == null  || mBluetoothAdapter.isEnabled())
-        {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivity(enableIntent);
-            finish();
-            return;
+        // Initialize a new IntentFilter instance
+        IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+
+
+        // Register the broadcast receiver
+
+        mContext.registerReceiver(mBroadcastReceiverBT, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+        // Get the widgets reference from XML layout
+        mTextView = (TextView) findViewById(R.id.dataReceived);
+        mTextView2 = (TextView) findViewById(R.id.stepsReceived);
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(getApplicationContext(), "Device doesn't support Bluetooth", Toast.LENGTH_SHORT).show();
         }
-        if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, "No LE Support", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-    }
-    @Override
-    protected  void onPause() {
-        super.onPause();
-        //mBluetoothAdapter.stopLeScan(this);
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu); //todo
-        for(int i = 0; i < mDevices.size(); i++) {
-            BluetoothDevice device = mDevices.valueAt(i);
-            menu.add(0, mDevices.keyAt(i), 0, device.getName());
-        }
-
-    }
-
-    @Override
-    public boolean onOptionItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.action_scan:
-                    mDevices.clear();
-                    startScan();
-                        return true;
-
-            default:
-                BluetoothDevice device = mDevices.get(item.getItemId());
-                Log.i("sdpd bluetooth", "Connecting to "+device.getName());
-                mConnectedGatt = device.connectGatt(this, true, mGattCallback);
-                //mHandler.sendMessage(Message.obtain()null, MSG_)
-                return super.onOptionsItemSelected(item);
-        }
-    }
-    private void startScan()
-    {
-        BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
-
-        ScanCallback mLeScanCallback = new ScanCallback() {
-
-            @Override
-            public void onScanResult(int callbackType, ScanResult result) {
-                super.onScanResult(callbackType, result);
+        if (!bluetoothAdapter.isEnabled()) {
+            blueToothStatus = false;
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            blueToothStatus = true;
+            Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
+            BluetoothDevice esp32;
+            if (bondedDevices.size() > 0) {
+                for (BluetoothDevice device : bondedDevices) {
+                    if (device.getName().equals("ESP32_SDPD")) {
+                        esp32 = device;
+                        try {
+                            ParcelUuid[] uuids = esp32.getUuids();
+                            BluetoothSocket socket = esp32.createRfcommSocketToServiceRecord(uuids[0].getUuid());
+                            socket.connect();
+                            outputStream = socket.getOutputStream();
+                            inStream = socket.getInputStream();
+                        } catch (Exception e) {
+                            Log.v("Error", e.toString());
+                        }
+                        break;
+                    }
+                }
             }
+        }
 
-            @Override
-            public void onBatchScanResults(List<ScanResult> results) {
-                super.onBatchScanResults(results);
-            }
 
+
+        thread = new Thread() {
             @Override
-            public void onScanFailed(int errorCode) {
-                super.onScanFailed(errorCode);
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(200);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+
+                            }
+                        });
+                    }
+
+                } catch (InterruptedException e) {
+                    Log.v("Error", e.toString());
+                }
             }
         };
-        scanner.startScan(mLeScanCallback);
+
     }
 
-    private void stopScan() {
-        BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
-        scanner.stopScan(new ScanCallback() {
 
-            @Override
-            public void onScanResult(int callbackType, ScanResult result) {
-                super.onScanResult(callbackType, result);
-            }
-
-            @Override
-            public void onBatchScanResults(List<ScanResult> results) {
-                super.onBatchScanResults(results);
-            }
-
-            @Override
-            public void onScanFailed(int errorCode) {
-                super.onScanFailed(errorCode);
-            }
-        });
-    }
-
-    private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-        private int mState = 0;
-        private void reset() { mState = 0;}
-        private void advance() {mState++;}
-        private void enableNextSensor(BluetoothGatt gatt){
-            BluetoothGattCharacteristic characteristic;
-            switch(mState){
-                case 0:
-                        Log.d("bluetooth", "Enabling pulse");
-                        characteristic = gatt.getService(SERVICE_UUID).getCharacteristic(PULSE_UUID);
-                        //characteristic get value;
-
-            }
-        }
-    };
-    private Runnable mStopRunnable = new Runnable() {
+    Thread receiveThread = new Thread() {
         @Override
         public void run() {
-            stopScan();
+            receiveData();
         }
     };
-    private Runnable mStartRunnable = new Runnable() {
-        @Override
-        public void run() {
-            startScan();
-        }
-    };
+
     @Override
-    public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-        Log.i("bluetooth", "New LE Device: " + device.getName() + " @ " + rssi);
-        /*
-         * We are looking for SensorTag devices only, so validate the name
-         * that each device reports before adding it to our collection
-         */
-        if (DEVICE_NAME.equals(device.getName())) {
-            mDevices.put(device.hashCode(), device);
-            //Update the overflow menu
-            invalidateOptionsMenu();
+    protected void onResume() {
+        super.onResume();
+        receiveThread.start();
+
+    }
+
+    public void receiveData() {
+
+        //byte[] buffer = new byte[256];
+        int bytes;
+        Log.v("b", "entered");
+        // Keep looping to listen for received messages
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
+        BluetoothDevice esp32;
+        if (bondedDevices.size() > 0) {
+            for (BluetoothDevice device : bondedDevices) {
+                if (device.getName().equals("ESP32")) {
+                    esp32 = device;
+                    try {
+                        Log.v("bluetooth", "Here");
+                        ParcelUuid[] uuids = esp32.getUuids();
+                        socket = esp32.createRfcommSocketToServiceRecord(uuids[0].getUuid());
+                        socket.connect();
+                        outputStream = socket.getOutputStream();
+                        inStream = socket.getInputStream();
+
+
+                    } catch (Exception e) {
+                        Log.v("Error", e.toString());
+                    }
+                    break;
+                }
+            }
         }
+        String PULSE = "Pulse";
+        boolean flag = false;
+        while (true) {
+            Log.v("b", "entered");
+            if (inStream == null)
+                break;
+            try {
+                byte[] buffer = new byte[256];
+                bytes = inStream.read(buffer);            //read bytes from input buffer
+                readMessage = new String(buffer, 0, bytes);
+                if(readMessage.equals("Pulse"))
+                    flag = true;
+                if(flag == false) {
+                    // Send the obtained bytes to the UI Activity via handler
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            mTextView.setText(readMessage);
+
+                        }
+                    });
+                }
+                else {
+                    if (readMessage.equals("Pulse") == false) {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+
+                                mTextView2.setText(readMessage);
+
+                            }
+                        });
+                        flag = false;
+                    }
+
+
+                }
+                Log.i("logging", readMessage + ""+flag);
+            } catch (IOException e) {
+                break;
+            }
+
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    public static boolean isCharging(Context context) {
+
+        Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int plug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        return plug == BatteryManager.BATTERY_PLUGGED_USB || plug == BatteryManager.BATTERY_PLUGGED_AC || plug == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
 }
