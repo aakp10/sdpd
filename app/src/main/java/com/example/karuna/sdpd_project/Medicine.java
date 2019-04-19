@@ -39,6 +39,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 public class Medicine extends AppCompatActivity {
 
@@ -80,15 +81,27 @@ public class Medicine extends AppCompatActivity {
 
             // Add items via the Button and EditText at the bottom of the view.
             final EditText text = (EditText) findViewById(R.id.todoText);
-            final CheckBox morning = (CheckBox) findViewById()
+            final CheckBox morning = (CheckBox) findViewById(R.id.morning);
+            final CheckBox noon = (CheckBox) findViewById(R.id.noon);
+            final CheckBox night = (CheckBox) findViewById(R.id.night);
             final Button button = (Button) findViewById(R.id.addButton);
             button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
 
-                    mDatabase.child("users").child(mUserId).child("items").push().child("title").setValue(text.getText().toString());
+                    HashMap<String, String> datamap = new HashMap<>();
+                    datamap.put("title", text.getText().toString());
+                    datamap.put("Morning", Boolean.toString(morning.isChecked()));
+                    datamap.put("Noon", Boolean.toString(noon.isChecked()));
+                    datamap.put("Night", Boolean.toString(night.isChecked()));
+                    mDatabase.child("users").child(mUserId).child("items").push().setValue(datamap);
                     //mDatabase.child("users").child(mUserId).child("items").push().child("morning").setValue(text.getText().toString());
-                    mDatabase.child("users").child(mUserId).child("items").push().child("Morning").setValue(.getText().toString());
+                    //mDatabase.child("users").child(mUserId).child("items").push().child("Morning").setValue(morning.isChecked());
+                    //mDatabase.child("users").child(mUserId).child("items").push().child("title").child("Noon").setValue(noon.isChecked());
+                    //mDatabase.child("users").child(mUserId).child("items").push().child("title").child("Night").setValue(night.isChecked());
                     text.setText("");
+                    morning.setChecked(false);
+                    noon.setChecked(false);
+                    night.setChecked(false);
                     Log.d("todo", "sending");
                 }
             });
@@ -99,9 +112,9 @@ public class Medicine extends AppCompatActivity {
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     Log.d("todo", "Fetching");
                     ListItem item = new ListItem((String) dataSnapshot.child("title").getValue(),
-                                                (boolean) dataSnapshot.child("Morning").getValue(),
-                                                (boolean) dataSnapshot.child("Noon").getValue(),
-                                                (boolean) dataSnapshot.child("Morning").getValue());
+                                                 Boolean.parseBoolean(dataSnapshot.child("Morning").getValue().toString()),
+                            Boolean.parseBoolean(dataSnapshot.child("Noon").getValue().toString()),
+                            Boolean.parseBoolean(dataSnapshot.child("Night").getValue().toString()));
                     listItems.add(item);
                     recyclerView.setAdapter(adapter);
                     //adapter.add((String) dataSnapshot.child("title").getValue());
